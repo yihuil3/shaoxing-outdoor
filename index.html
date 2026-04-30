@@ -4,118 +4,329 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>绍兴亲子户外 · 徒步野餐露营全攻略</title>
-<!-- Leaflet CSS: 国内CDN优先, unpkg兜底 -->
 <link rel="stylesheet" href="https://cdn.staticfile.org/leaflet/1.9.4/leaflet.min.css" />
 <script>
-// 如果 staticfile 加载失败，尝试 bootcdn
 (function(){var t=document.querySelector('link[href*="staticfile"]');if(t){t.onerror=function(){var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css';document.head.appendChild(l);}}})();
 </script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#f5f5f5}
-
-/* 顶部栏 */
-#topbar{position:fixed;top:0;left:0;right:0;z-index:1100;background:linear-gradient(135deg,#2d6a4f 0%,#40916c 100%);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
-#topbar h1{font-size:17px;font-weight:700;flex:1}
-#topbar .date{font-size:11px;opacity:0.85}
-
-/* 页面容器 */
-.page{position:fixed;top:48px;left:0;right:0;bottom:50px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
-.page.active{display:block}
-
-/* 地图页 */
-#page-map{padding:0;bottom:50px;background:#e8e4df}
-#map{height:100%;width:100%}
-#map-loading{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  text-align:center;color:#888;z-index:500;pointer-events:none;
+/* ===== Design System: Soft & Organic ===== */
+:root {
+  --green: #2D6A4F;
+  --green-light: #40916C;
+  --green-pale: #D8F3DC;
+  --green-bg: #F0FDF4;
+  --amber: #E07A3D;
+  --amber-light: #F4A261;
+  --amber-pale: #FFF3E0;
+  --blue: #3B6FB6;
+  --blue-light: #60A5FA;
+  --blue-pale: #EFF6FF;
+  --purple: #7C5CBF;
+  --purple-pale: #F5F3FF;
+  --bg: #FAF7F2;
+  --card: #FFFFFF;
+  --text: #1B1B1B;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #F0EDE8;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
-#map-loading .spinner{display:inline-block;width:36px;height:36px;border:3px solid #ddd;border-top-color:#2d6a4f;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:8px}
-@keyframes spin{to{transform:rotate(360deg)}}
-#map-error{display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#666;z-index:500;background:rgba(255,255,255,0.95);padding:20px 24px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.1)}
-#map-error button{margin-top:10px;padding:8px 20px;border-radius:20px;background:#2d6a4f;color:#fff;border:none;font-size:14px;cursor:pointer}
 
-/* 图例 */
-#legend{position:fixed;top:58px;right:8px;z-index:1000;background:rgba(255,255,255,0.94);border-radius:10px;padding:6px 10px;box-shadow:0 2px 10px rgba(0,0,0,0.13);font-size:11px;line-height:1.7}
-#legend span{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
-#locate-btn{position:fixed;bottom:120px;right:12px;z-index:1001;width:42px;height:42px;border-radius:50%;background:#fff;border:none;box-shadow:0 2px 12px rgba(0,0,0,0.2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; width:100%; overflow:hidden; font-family:var(--font); background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
 
-/* Popup */
-.leaflet-popup-content-wrapper{border-radius:14px}
-.leaflet-popup-content{margin:10px 14px;font-size:13px;min-width:200px}
-.popup-name{font-size:15px;font-weight:700;color:#222;margin-bottom:4px}
-.popup-meta{font-size:11px;color:#888;margin-bottom:8px}
-.popup-nav{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
-.popup-nav a{display:inline-block;padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:500;white-space:nowrap;color:#fff}
-.nav-amap{background:#07C160}.nav-apple{background:#007AFF}.nav-google{background:#4285F4}.nav-baidu{background:#DE2A1E}
+/* ===== Top Bar ===== */
+#topbar {
+  position:fixed; top:0; left:0; right:0; z-index:1100;
+  background:linear-gradient(135deg, #1B4332 0%, var(--green) 40%, #40916C 100%);
+  color:#fff; padding:14px 18px; display:flex; align-items:center; gap:10px;
+  box-shadow:0 2px 20px rgba(45,106,79,0.25);
+}
+#topbar .logo { font-size:26px; line-height:1; }
+#topbar h1 { font-size:17px; font-weight:700; flex:1; letter-spacing:0.3px; }
+#topbar .badge {
+  font-size:10px; background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:20px;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+}
 
-/* 攻略列表 */
-#page-guide{padding:12px}
-.guide-card{background:#fff;border-radius:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden}
-.guide-card-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.guide-card-header .emoji{font-size:28px;flex-shrink:0}
-.guide-card-header .info{flex:1;min-width:0}
-.guide-card-header .name{font-size:15px;font-weight:700;color:#222}
-.guide-card-header .summary{font-size:12px;color:#888;margin-top:3px}
-.guide-card-header .arrow{font-size:14px;color:#ccc;transition:transform 0.2s}
-.guide-card.open .guide-card-header .arrow{transform:rotate(180deg)}
-.guide-card-body{display:none;padding:0 16px 16px;border-top:1px solid #f0f0f0}
-.guide-card.open .guide-card-body{display:block}
-.guide-card-body .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.guide-card-body .tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
-.tag-diff-easy{background:#dcfce7;color:#166534}.tag-diff-mid{background:#fef3c7;color:#92400e}.tag-diff-hard{background:#fee2e2;color:#991b1b}
-.tag-season{background:#dbeafe;color:#1e40af}.tag-facility{background:#f3e8ff;color:#6b21a8}
-.guide-card-body .detail{font-size:13px;color:#555;line-height:1.7;margin-top:10px}
-.guide-card-body .nav-row{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
-.guide-card-body .nav-row a{display:inline-block;padding:8px 16px;border-radius:20px;font-size:12px;text-decoration:none;font-weight:500;color:#fff}
+/* ===== Page Container ===== */
+.page { position:fixed; top:52px; left:0; right:0; bottom:62px; overflow-y:auto; -webkit-overflow-scrolling:touch; display:none; background:var(--bg); }
+.page.active { display:block; }
 
-/* 贴士 */
-#page-tips{padding:12px}
-.tips-section{background:#fff;border-radius:14px;margin-bottom:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.tips-section h3{font-size:15px;color:#2d6a4f;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.tips-section ul{list-style:none;padding:0}
-.tips-section li{font-size:13px;color:#444;line-height:1.7;padding:5px 0;border-bottom:1px solid #f8f8f8;display:flex;align-items:flex-start;gap:6px}
-.tips-section li:last-child{border-bottom:none}
-.tips-section li .bullet{color:#40916c;flex-shrink:0}
-.checklist-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#444;border-bottom:1px solid #f8f8f8;cursor:pointer}
-.checklist-item:last-child{border-bottom:none}
-.checklist-item input[type=checkbox]{width:18px;height:18px;accent-color:#2d6a4f;flex-shrink:0}
-.checklist-item input:checked+span{text-decoration:line-through;color:#aaa}
-.season-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.season-card{border-radius:10px;padding:12px;text-align:center}
-.season-card .s-icon{font-size:28px;display:block;margin-bottom:4px}
-.season-card .s-name{font-size:13px;font-weight:600;color:#333}
-.season-card .s-desc{font-size:10px;color:#888;margin-top:2px}
-.season-spring{background:#f0fdf4}.season-summer{background:#fef7ed}.season-autumn{background:#fef2f2}.season-winter{background:#f0f9ff}
+/* ===== Map Page ===== */
+#page-map { padding:0; bottom:62px; background:#E8E4DF; }
+#map { height:100%; width:100%; }
 
-/* 底部TabBar */
-#tabbar{position:fixed;bottom:0;left:0;right:0;z-index:1100;display:flex;background:#fff;border-top:1px solid #e5e5e5;padding-bottom:env(safe-area-inset-bottom)}
-.tab{flex:1;text-align:center;padding:7px 0 5px;cursor:pointer;color:#999;font-size:10px;transition:color 0.2s;-webkit-tap-highlight-color:transparent}
-.tab .tab-icon{font-size:22px;display:block;margin-bottom:1px}
-.tab.active{color:#2d6a4f;font-weight:600}
+#map-loading {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  text-align:center; color:var(--text-secondary); z-index:500; pointer-events:none;
+}
+#map-loading .spinner {
+  display:inline-block; width:40px; height:40px;
+  border:3px solid #E5E7EB; border-top-color:var(--green);
+  border-radius:50%; animation:spin 0.7s linear infinite; margin-bottom:10px;
+}
+@keyframes spin { to { transform:rotate(360deg) } }
 
-/* Toast */
-.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:#fff;padding:12px 24px;border-radius:20px;font-size:14px;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.3s}
-.toast.show{opacity:1}
+#map-error {
+  display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  text-align:center; color:var(--text-secondary); z-index:500;
+  background:rgba(255,255,255,0.96); padding:24px 28px; border-radius:var(--radius);
+  box-shadow:var(--shadow-lg);
+}
+#map-error button {
+  margin-top:10px; padding:10px 22px; border-radius:24px;
+  background:var(--green); color:#fff; border:none; font-size:14px; cursor:pointer;
+  font-family:var(--font); transition:transform 0.15s;
+}
+#map-error button:active { transform:scale(0.96); }
 
-@media(max-width:380px){#topbar h1{font-size:15px}.guide-card-header .name{font-size:14px}}
+/* ===== Legend (Floating) ===== */
+#legend {
+  position:fixed; top:62px; right:10px; z-index:1000;
+  background:rgba(255,255,255,0.94); border-radius:var(--radius-sm); padding:8px 12px;
+  box-shadow:var(--shadow-md); font-size:11px; line-height:1.9;
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+}
+#legend span { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+
+#locate-btn {
+  position:fixed; bottom:130px; right:14px; z-index:1001;
+  width:44px; height:44px; border-radius:50%; background:#fff;
+  border:none; box-shadow:var(--shadow-md); font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform 0.15s;
+}
+#locate-btn:active { transform:scale(0.92); }
+
+/* ===== Popup ===== */
+.leaflet-popup-content-wrapper { border-radius:var(--radius); }
+.leaflet-popup-content { margin:10px 14px; font-size:13px; min-width:210px; font-family:var(--font); }
+.popup-name { font-size:15px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.popup-meta { font-size:11px; color:var(--text-muted); margin-bottom:10px; line-height:1.5; }
+.popup-nav { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
+.popup-nav a {
+  display:inline-block; padding:7px 14px; border-radius:20px; font-size:12px;
+  text-decoration:none; font-weight:500; white-space:nowrap; color:#fff;
+  transition:transform 0.15s;
+}
+.popup-nav a:active { transform:scale(0.95); }
+.nav-amap { background:#07C160; } .nav-apple { background:#007AFF; }
+.nav-google { background:#4285F4; } .nav-baidu { background:#DE2A1E; }
+
+/* ===== Guide Page ===== */
+#page-guide { padding:4px 12px 16px; }
+
+/* Filter Chips */
+#filter-bar {
+  display:flex; gap:8px; padding:10px 0 14px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none; flex-shrink:0;
+}
+#filter-bar::-webkit-scrollbar { display:none; }
+.filter-chip {
+  padding:7px 16px; border-radius:20px; font-size:12px; font-weight:600;
+  border:1.5px solid var(--border); background:var(--card); color:var(--text-secondary);
+  white-space:nowrap; cursor:pointer; transition:all 0.2s;
+  font-family:var(--font); flex-shrink:0;
+}
+.filter-chip.active { background:var(--green); color:#fff; border-color:var(--green); }
+.filter-chip:active { transform:scale(0.95); }
+
+#guide-count { font-size:12px; color:var(--text-muted); padding:0 0 8px 2px; }
+
+/* Guide Card */
+.guide-card {
+  background:var(--card); border-radius:var(--radius); margin-bottom:12px;
+  box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--border);
+  transition:box-shadow 0.2s;
+}
+.guide-card.open { box-shadow:var(--shadow-md); }
+.guide-card-header {
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
+  position:relative;
+}
+.guide-card-header::before {
+  content:''; position:absolute; left:0; top:10px; bottom:10px; width:4px; border-radius:0 3px 3px 0;
+}
+.guide-card.cat-hike .guide-card-header::before { background:var(--green); }
+.guide-card.cat-camp .guide-card-header::before { background:var(--amber); }
+.guide-card.cat-park .guide-card-header::before { background:var(--blue); }
+.guide-card.cat-new .guide-card-header::before { background:var(--purple); }
+
+.guide-card-header .emoji { font-size:32px; flex-shrink:0; line-height:1; }
+.guide-card-header .info { flex:1; min-width:0; }
+.guide-card-header .name { font-size:16px; font-weight:700; color:var(--text); letter-spacing:0.2px; }
+.guide-card-header .name .cat-label { font-size:10px; font-weight:500; color:var(--text-muted); margin-left:4px; }
+.guide-card-header .summary { font-size:12px; color:var(--text-secondary); margin-top:3px; line-height:1.4; }
+.guide-card-header .arrow {
+  font-size:12px; color:var(--text-muted); transition:transform 0.3s ease;
+  flex-shrink:0;
+}
+.guide-card.open .guide-card-header .arrow { transform:rotate(180deg); }
+
+.guide-card-body { display:none; padding:0 16px 18px; border-top:1px solid var(--border); }
+.guide-card.open .guide-card-body { display:block; animation:fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+.guide-card-body .detail { font-size:13px; color:#444; line-height:1.8; margin-top:14px; }
+.guide-card-body .detail b { color:var(--text); }
+
+/* Warning box */
+.guide-card-body .warn-box {
+  background:#FFF7ED; border-left:3px solid var(--amber); border-radius:var(--radius-xs);
+  padding:10px 14px; margin-top:12px; font-size:12px; color:#9A3412; line-height:1.6;
+}
+.guide-card-body .warn-box .warn-title { font-weight:700; margin-bottom:4px; }
+
+/* Tips box */
+.guide-card-body .tip-box {
+  background:var(--green-bg); border-left:3px solid var(--green-light);
+  border-radius:var(--radius-xs); padding:10px 14px; margin-top:8px;
+  font-size:12px; color:#14532D; line-height:1.6;
+}
+.guide-card-body .tip-box .tip-title { font-weight:700; margin-bottom:4px; }
+
+/* Tags */
+.guide-card-body .tag-row { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.guide-card-body .tag {
+  display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600;
+}
+.tag-diff-easy { background:var(--green-pale); color:#166534; }
+.tag-diff-mid { background:var(--amber-pale); color:#92400E; }
+.tag-diff-hard { background:#FEE2E2; color:#991B1B; }
+.tag-season { background:var(--blue-pale); color:#1E40AF; }
+.tag-facility { background:var(--purple-pale); color:#6B21A8; }
+
+/* Nav buttons in card */
+.guide-card-body .nav-row { margin-top:12px; display:flex; gap:6px; flex-wrap:wrap; }
+.guide-card-body .nav-row a {
+  display:inline-block; padding:9px 16px; border-radius:22px; font-size:12px;
+  text-decoration:none; font-weight:600; color:#fff; transition:transform 0.15s;
+}
+.guide-card-body .nav-row a:active { transform:scale(0.95); }
+
+/* ===== Weather Card ===== */
+.weather-card {
+  background:linear-gradient(135deg, #E0F2FE 0%, #F0FDF4 100%);
+  border-radius:var(--radius); padding:16px; margin-bottom:12px;
+  box-shadow:var(--shadow); border:1px solid #BAE6FD;
+}
+.weather-card .w-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.weather-card .w-header .w-icon { font-size:40px; line-height:1; }
+.weather-card .w-header .w-title { font-size:16px; font-weight:700; color:var(--text); }
+.weather-card .w-header .w-sub { font-size:11px; color:var(--text-secondary); }
+.weather-day-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:4px; }
+.weather-day {
+  background:rgba(255,255,255,0.7); border-radius:var(--radius-sm); padding:10px 6px;
+  text-align:center; backdrop-filter:blur(4px);
+}
+.weather-day .wd-date { font-size:10px; color:var(--text-secondary); margin-bottom:2px; }
+.weather-day .wd-icon { font-size:22px; display:block; margin:4px 0; }
+.weather-day .wd-temp { font-size:12px; font-weight:700; color:var(--text); }
+.weather-day .wd-desc { font-size:9px; color:var(--text-muted); margin-top:2px; }
+.weather-day.today { background:var(--green); color:#fff; }
+.weather-day.today .wd-date, .weather-day.today .wd-desc { color:rgba(255,255,255,0.8); }
+.weather-day.today .wd-temp { color:#fff; }
+.weather-alert {
+  margin-top:12px; padding:10px 14px; background:rgba(255,255,255,0.6);
+  border-radius:var(--radius-xs); font-size:11px; color:var(--text-secondary); line-height:1.6;
+}
+.weather-alert strong { color:var(--amber); }
+
+/* ===== Tips Page ===== */
+#page-tips { padding:8px 12px 20px; }
+.tips-section {
+  background:var(--card); border-radius:var(--radius); margin-bottom:12px;
+  padding:18px; box-shadow:var(--shadow); border:1px solid var(--border);
+}
+.tips-section h3 { font-size:16px; color:var(--green); margin-bottom:12px; display:flex; align-items:center; gap:8px; letter-spacing:0.2px; }
+.tips-section ul { list-style:none; padding:0; }
+.tips-section li {
+  font-size:13px; color:#444; line-height:1.7; padding:6px 0;
+  border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:8px;
+}
+.tips-section li:last-child { border-bottom:none; }
+.tips-section li .bullet { color:var(--green-light); flex-shrink:0; font-weight:700; }
+
+.checklist-item {
+  display:flex; align-items:center; gap:10px; padding:7px 0;
+  font-size:13px; color:#444; border-bottom:1px solid var(--border); cursor:pointer;
+}
+.checklist-item:last-child { border-bottom:none; }
+.checklist-item input[type=checkbox] { width:20px; height:20px; accent-color:var(--green); flex-shrink:0; border-radius:4px; }
+.checklist-item input:checked + span { text-decoration:line-through; color:var(--text-muted); }
+
+.season-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+.season-card { border-radius:var(--radius-sm); padding:14px 10px; text-align:center; }
+.season-card .s-icon { font-size:30px; display:block; margin-bottom:6px; }
+.season-card .s-name { font-size:13px; font-weight:700; }
+.season-card .s-desc { font-size:10px; color:var(--text-secondary); margin-top:3px; line-height:1.4; }
+.season-spring { background:linear-gradient(135deg,#F0FDF4,#ECFDF5); }
+.season-summer { background:linear-gradient(135deg,#FFF7ED,#FFEDD5); }
+.season-autumn { background:linear-gradient(135deg,#FEF2F2,#FEE2E2); }
+.season-winter { background:linear-gradient(135deg,#EFF6FF,#DBEAFE); }
+
+/* ===== Bottom Tab Bar ===== */
+#tabbar {
+  position:fixed; bottom:0; left:0; right:0; z-index:1100;
+  display:flex; background:rgba(255,255,255,0.96);
+  border-top:1px solid var(--border); padding:4px 0 calc(4px + env(safe-area-inset-bottom));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.tab {
+  flex:1; text-align:center; padding:6px 0 4px; cursor:pointer;
+  color:var(--text-muted); font-size:10px; font-weight:500;
+  transition:color 0.2s; -webkit-tap-highlight-color:transparent;
+  font-family:var(--font);
+}
+.tab .tab-icon { font-size:22px; display:block; margin-bottom:2px; transition:transform 0.2s; }
+.tab.active { color:var(--green); font-weight:700; }
+.tab.active .tab-icon { transform:scale(1.1); }
+
+/* ===== Toast ===== */
+.toast {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.82); color:#fff; padding:12px 28px;
+  border-radius:24px; font-size:14px; z-index:9999; pointer-events:none;
+  opacity:0; transition:opacity 0.3s; font-family:var(--font);
+}
+.toast.show { opacity:1; }
+
+/* ===== Responsive ===== */
+@media(max-width:380px) {
+  #topbar h1 { font-size:15px; }
+  .guide-card-header .name { font-size:14px; }
+  .weather-day-grid { grid-template-columns:repeat(5,1fr); gap:4px; }
+  .weather-day { padding:8px 4px; }
+}
 </style>
 </head>
 <body>
 
-<div id="topbar"><h1>🏕️ 绍兴亲子户外全攻略</h1><span class="date">五一特辑</span></div>
+<div id="topbar">
+  <span class="logo">🏕️</span>
+  <h1>绍兴亲子户外全攻略</h1>
+  <span class="badge">五一特辑</span>
+</div>
 <div id="toast" class="toast"></div>
 
-<!-- ===== 地图页 ===== -->
+<!-- ===== Map Page ===== -->
 <div class="page active" id="page-map">
   <div id="map">
     <div id="map-loading"><div class="spinner"></div><div style="font-size:13px">加载地图中...</div></div>
     <div id="map-error">
-      <div style="font-size:40px;margin-bottom:8px">🗺️</div>
-      <div>地图加载失败</div>
-      <div style="font-size:12px;color:#999;margin-top:4px">可在「攻略」和「贴士」标签查看完整内容</div>
+      <div style="font-size:44px;margin-bottom:8px">🗺️</div>
+      <div style="font-weight:600">地图加载失败</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:4px">可在「攻略」和「贴士」标签查看完整内容</div>
       <button onclick="switchTab('page-guide',document.querySelector('.tab[data-page=page-guide]'))">📋 查看攻略</button>
-      <button onclick="retryMap()" style="margin-left:6px;background:#f59e0b">🔄 重试地图</button>
+      <button onclick="retryMap()" style="margin-left:6px;background:#F59E0B">🔄 重试地图</button>
     </div>
   </div>
   <div id="legend">
@@ -127,17 +338,75 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
   <button id="locate-btn" onclick="locateMe()">📍</button>
 </div>
 
-<!-- ===== 攻略页 ===== -->
+<!-- ===== Guide Page ===== -->
 <div class="page" id="page-guide">
-  <div style="padding:4px 0 8px;font-size:13px;color:#888">共 17 个目的地 · 点击展开详情 · 点击导航按钮直接跳转手机地图</div>
+  <div id="filter-bar">
+    <div class="filter-chip active" data-cat="all" onclick="filterGuide('all',this)">🌿 全部</div>
+    <div class="filter-chip" data-cat="hike" onclick="filterGuide('hike',this)">🥾 徒步</div>
+    <div class="filter-chip" data-cat="camp" onclick="filterGuide('camp',this)">⛺ 露营</div>
+    <div class="filter-chip" data-cat="park" onclick="filterGuide('park',this)">🌳 公园</div>
+    <div class="filter-chip" data-cat="new" onclick="filterGuide('new',this)">✨ 新晋</div>
+  </div>
+  <div id="guide-count"></div>
   <div id="guide-list"></div>
+  <div style="height:8px"></div>
 </div>
 
-<!-- ===== 贴士页 ===== -->
+<!-- ===== Tips Page ===== -->
 <div class="page" id="page-tips">
+
+  <!-- Weather Section -->
+  <div class="weather-card">
+    <div class="w-header">
+      <span class="w-icon">🌤️</span>
+      <div>
+        <div class="w-title">五一假期天气</div>
+        <div class="w-sub">绍兴 · 2026年5月1日-5日</div>
+      </div>
+    </div>
+    <div class="weather-day-grid">
+      <div class="weather-day today">
+        <div class="wd-date">5/1 周五</div>
+        <span class="wd-icon">☀️</span>
+        <div class="wd-temp">27° / 15°</div>
+        <div class="wd-desc">晴到多云</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-date">5/2 周六</div>
+        <span class="wd-icon">⛅</span>
+        <div class="wd-temp">30° / 18°</div>
+        <div class="wd-desc">多云转阴</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-date">5/3 周日</div>
+        <span class="wd-icon">🌧️</span>
+        <div class="wd-temp">22° / 16°</div>
+        <div class="wd-desc">阵雨/雷雨</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-date">5/4 周一</div>
+        <span class="wd-icon">🌤️</span>
+        <div class="wd-temp">24° / 15°</div>
+        <div class="wd-desc">多云转晴</div>
+      </div>
+      <div class="weather-day">
+        <div class="wd-date">5/5 周二</div>
+        <span class="wd-icon">☀️</span>
+        <div class="wd-temp">27° / 16°</div>
+        <div class="wd-desc">晴到多云</div>
+      </div>
+    </div>
+    <div class="weather-alert">
+      <strong>⚡ 重要提醒：</strong>五一假期“两头晴中间雨”。<strong>5月1日+2日白天最适合户外出行</strong>；2日夜间至3日有中到大雨+阵风，不建议进山；4-5日天气转好适合返程。山区昼夜温差约10°C，请带薄外套+防晒+雨具。雨天古道/溪流路滑，3日避免户外活动。
+    </div>
+  </div>
+
+  <!-- Checklist -->
   <div class="tips-section">
     <h3>🎒 带娃出行装备清单</h3><div id="checklist"></div>
   </div>
+
+  <!-- Seasons -->
   <div class="tips-section">
     <h3>📅 四季推荐</h3>
     <div class="season-grid">
@@ -147,6 +416,8 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
       <div class="season-card season-winter"><span class="s-icon">❄️</span><span class="s-name">冬 (12-2月)</span><span class="s-desc">雪景古道别有风味<br>注意保暖防滑</span></div>
     </div>
   </div>
+
+  <!-- Safety -->
   <div class="tips-section">
     <h3>⚠️ 亲子安全须知</h3>
     <ul>
@@ -160,6 +431,8 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
       <li><span class="bullet">8.</span> 玩水多带 2-3 套换洗衣物，溯溪鞋必备，勿穿拖鞋下水</li>
     </ul>
   </div>
+
+  <!-- LNT -->
   <div class="tips-section">
     <h3>🌱 无痕出游原则</h3>
     <ul>
@@ -170,6 +443,8 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
       <li><span class="bullet">📵</span> 户外音响不外放，尊重他人享受自然的权利</li>
     </ul>
   </div>
+
+  <!-- Emergency -->
   <div class="tips-section">
     <h3>🆘 紧急联系</h3>
     <ul>
@@ -180,17 +455,23 @@ html,body{height:100%;width:100%;overflow:hidden;font-family:-apple-system,Blink
       <li><span class="bullet">🏥</span> 柯桥区中心医院：0575-85580888</li>
     </ul>
   </div>
-  <div style="height:20px"></div>
+  <div style="height:16px"></div>
 </div>
 
-<!-- ===== TabBar ===== -->
+<!-- ===== Tab Bar ===== -->
 <div id="tabbar">
-  <div class="tab active" data-page="page-map" onclick="switchTab('page-map',this)"><span class="tab-icon">🗺️</span>地图</div>
-  <div class="tab" data-page="page-guide" onclick="switchTab('page-guide',this)"><span class="tab-icon">📋</span>攻略</div>
-  <div class="tab" data-page="page-tips" onclick="switchTab('page-tips',this)"><span class="tab-icon">💡</span>贴士</div>
+  <div class="tab active" data-page="page-map" onclick="switchTab('page-map',this)">
+    <span class="tab-icon">🗺️</span>地图
+  </div>
+  <div class="tab" data-page="page-guide" onclick="switchTab('page-guide',this)">
+    <span class="tab-icon">📋</span>攻略
+  </div>
+  <div class="tab" data-page="page-tips" onclick="switchTab('page-tips',this)">
+    <span class="tab-icon">💡</span>贴士
+  </div>
 </div>
 
-<!-- Leaflet JS: 国内 CDN 优先 -->
+<!-- Leaflet JS -->
 <script src="https://cdn.staticfile.org/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 if(typeof L==='undefined'){
@@ -199,82 +480,237 @@ if(typeof L==='undefined'){
 </script>
 
 <script>
-// ===== 数据 =====
+// ===== Enriched Destination Data =====
 var PLACES = [
-  {id:0,name:"梅坞古道",cat:"hike",diff:"简单",diffCls:"tag-diff-easy",lat:29.930,lng:120.820,season:"春夏秋",summary:"5km环线 · 上虞小九寨 · 竹林幽径 · 亲子首选",desc:"上虞最友好的亲子徒步路线。全程约 5 公里环线，累计爬升仅 168 米，5 岁以上孩子可独立完成。澄湖（蓝宝石湖）是最大亮点，水质清澈见底，沿途竹林遮天蔽日。入口憩马桥有小吃摊和咖啡车，山顶驿廊有洗手间。<br><br><b>🅿️ 停车：</b>梅坞村村委会免费停车场（首选），古道入口少量车位<br><b>⏱️ 用时：</b>2.5-3.5 小时<br><b>📶 信号：</b>山中段不稳定，建议下载离线地图",nav:"绍兴市上虞区上浦镇梅坞村村委会",facilities:"停车场|厕所|小吃摊|咖啡车"},
-  {id:1,name:"石井水库环湖",cat:"hike",diff:"极简",diffCls:"tag-diff-easy",lat:29.883,lng:120.833,season:"春秋冬",summary:"4km平路 · 水杉林 · 婴儿车可推 · 露营野餐一站式",desc:"几乎零爬升的环湖路线，婴儿车和学步娃完全没问题。11月水杉变红时是绝美的“天空之镜”。水库边大片草坪可以搭帐篷、野餐，是绍兴近郊最轻松的户外选择。可以和梅坞古道串联成一日游。<br><br><b>🅿️ 停车：</b>水库入口免费停车，周末人多建议早到<br><b>🚻 设施：</b>有公共厕所和自来水<br><b>⚠️ 注意：</b>滩涂泥泞小心陷脚，禁止篝火",nav:"绍兴市上虞区上浦镇石井水库",facilities:"免费停车|厕所|自来水"},
-  {id:2,name:"日铸岭古道",cat:"hike",diff:"简单",diffCls:"tag-diff-easy",lat:29.903,lng:120.662,season:"全年",summary:"6km · 南宋古道 · 兰若寺水库 · 竹林石阶 · 历史感",desc:"南宋时期的官道，石阶保存完好。从锁泗桥出发，沿途竹林参天，终点可到兰若寺水库和兰若湖景区，适合把徒步和露营串联。野路段对孩子来说有探险趣味。全程约 6 公里，2000 余级石阶。<br><br><b>🅿️ 停车：</b>锁泗桥附近路边可停<br><b>⏱️ 用时：</b>3-4 小时<br><b>🔗 串联：</b>可顺路游玩兰若湖景区",nav:"绍兴市柯桥区平水镇锁泗桥",facilities:"路边停车|兰若湖配套"},
-  {id:3,name:"埃码尖小环线",cat:"hike",diff:"简单",diffCls:"tag-diff-easy",lat:29.910,lng:120.790,season:"春夏秋",summary:"4km环线 · 大岙水库 · 绍兴小九寨沟",desc:"相对小众的短环线，4 公里左右，途经大岙水库，水质完全不输九寨沟的蓝绿色。人少清静，适合想避开人流的小团队家庭出行。<br><br><b>🅿️ 停车：</b>村口免费停车<br><b>⏱️ 用时：</b>2-3 小时",nav:"绍兴市上虞区埃码尖",facilities:"村口停车"},
-  {id:4,name:"盐帮十八渡",cat:"hike",diff:"中等",diffCls:"tag-diff-mid",lat:29.460,lng:120.960,season:"夏秋",summary:"5.4km(亲子段) · 18个渡口 · 鱼鳞坝 · 最佳玩水路线",desc:"新昌深山里的宝藏玩水线。十八个渡口每个都是天然的玩水点，鱼鳞坝是网红打卡点，孩子们可以安全地踩水、捞小鱼。如果只走十八渡玩水段（0 爬升），从里家溪村出发到牛坪渡往返，约 5.4 公里。完整环线约 13 公里。<br><br><b>🅿️ 停车：</b>里家溪村免费停车<br><b>⏱️ 用时：</b>玩水段 2-3 小时<br><b>👶 建议：</b>带溯溪鞋+水枪+换洗衣物",nav:"绍兴市新昌县里家溪村",facilities:"村口停车|沿途无补给"},
-  {id:5,name:"韩妃江古道",cat:"hike",diff:"中等",diffCls:"tag-diff-mid",lat:29.440,lng:120.900,season:"春夏秋",summary:"8km · 山水栈道 · 玉狮潭 · 新手友好",desc:"从新昌白岩村出发的山水栈道，全程约 8 公里，沿韩妃江而行，风景绝佳。路线平缓为主，对体力要求不高。玉狮潭水色碧绿，是拍照和休息的好地方，被称作浙江最轻松的山水徒步线之一。<br><br><b>🅿️ 停车：</b>白岩村免费停车<br><b>⏱️ 用时：</b>3-4 小时<br><b>🔗 可串联：</b>盐帮十八渡（同一区域）",nav:"绍兴市新昌县白岩村",facilities:"村口停车|沿途无补给"},
-  {id:6,name:"丁宅乡环浙步道",cat:"hike",diff:"简单",diffCls:"tag-diff-easy",lat:29.847,lng:120.955,season:"春夏秋",summary:"5km · 龙鳞坝 · 十里桃花绿道 · 官方赛事路线",desc:"上虞丁宅乡的官方步道，设施完善安全。春季十里桃花盛开，龙鳞坝是网红打卡点，附近还有水上乐园。2025 年举办过环浙步道徒步赛，路线成熟，标识清晰。<br><br><b>🅿️ 停车：</b>丁宅乡停车场<br><b>⏱️ 用时：</b>2-3 小时",nav:"绍兴市上虞区丁宅乡",facilities:"停车场|龙鳞坝|水上乐园"},
-  {id:7,name:"雪窦岭古道",cat:"hike",diff:"中等",diffCls:"tag-diff-mid",lat:29.950,lng:120.580,season:"秋",summary:"10km往返 · 水杉林 · 山顶悬崖咖啡",desc:"秋季水杉红了的时候最美。全程约 10 公里往返，山顶有悬崖杉洞咖啡可以歇脚补给。路平缓，补给好，虽然距离长但对新手仍然友好。<br><br><b>🅿️ 停车：</b>稽东镇入口停车场<br><b>⏱️ 用时：</b>4-5 小时<br><b>☕ 亮点：</b>山顶悬崖咖啡",nav:"绍兴市柯桥区稽东镇雪窦岭",facilities:"停车场|山顶咖啡"},
-  {id:8,name:"覆卮山景区",cat:"hike",diff:"较难",diffCls:"tag-diff-hard",lat:29.820,lng:120.980,season:"春秋",summary:"4-5小时 · 千亩梯田 · 万年石浪 · 冰川遗迹",desc:"适合有徒步经验的大孩子家庭。万年石浪攀爬是最独特的体验（需家长陪同保护），千年梯田四季皆美。体力要求较高，不建议 8 岁以下尝试全程。<br><br><b>🅿️ 停车：</b>景区停车场<br><b>⏱️ 用时：</b>4-5 小时<br><b>⚠️ 注意：</b>石浪段需手脚并用，戴手套",nav:"绍兴市上虞区覆卮山景区",facilities:"景区停车场|游客中心|补给点"},
-  {id:9,name:"石井水库露营地",cat:"camp",diff:"",diffCls:"",lat:29.882,lng:120.835,season:"春秋冬",summary:"免费 · 水杉林下搭帐篷 · 秋季天空之镜",desc:"与石井水库环湖徒步共享同一片水杉林，是绍兴最出片的露营地。秋季水杉变红时湖水如镜面，被称作“天空之镜”。草坪平坦适合搭帐篷，有公共厕所和自来水。周末需早到占位。<br><br><b>💰 费用：</b>免费<br><b>🚫 禁止：</b>篝火<br><b>🔥 允许：</b>卡式炉（注意防火）",nav:"绍兴市上虞区上浦镇石井水库",facilities:"免费|厕所|自来水"},
-  {id:10,name:"兰若湖景区",cat:"camp",diff:"",diffCls:"",lat:29.950,lng:120.600,season:"全年",summary:"免费沙滩 · 无动力乐园 · 皮划艇 · 萌宠互动 · 全龄友好",desc:"2025年爆火的绍兴新晋遛娃天花板。免费沙滩让孩子尽情挖沙，丹麦进口无动力乐园免费玩，皮划艇、萌宠互动、大草坪野餐一应俱全。附近有桃源里餐厅和湖景民宿，可露营过夜。<br><br><b>💰 费用：</b>门票+停车全免<br><b>⏰ 开放：</b>8:30-17:00<br><b>🍽️ 餐饮：</b>桃源里餐厅、咖啡车",nav:"绍兴市柯桥区平王线兰若湖景区",facilities:"免费|停车场|厕所|餐厅|民宿"},
-  {id:11,name:"迪荡湖公园",cat:"camp",diff:"",diffCls:"",lat:30.013,lng:120.613,season:"全年",summary:"近郊超大草坪 · 环湖骑行 · 儿童游乐区",desc:"越城区最近的休闲露营地，离市区仅十几分钟。超大草坪适合放风筝、踢球、野餐。环湖绿道可以带孩子骑行，有专门的儿童游乐区。适合不想跑太远的半日休闲游。<br><br><b>💰 费用：</b>停车 5 元/4 小时<br><b>🚲 设施：</b>环湖绿道、儿童游乐区、自助售货机",nav:"绍兴市越城区迪荡湖公园东入口",facilities:"收费停车|厕所|游乐区"},
-  {id:12,name:"丁宅乡双桥村",cat:"camp",diff:"",diffCls:"",lat:29.850,lng:120.958,season:"春夏秋",summary:"免费溪流 · 抓鱼捡螺蛳 · 龙鳞坝网红打卡",desc:"丁宅乡除了环浙步道，双桥村的溪流更是玩水遛娃的好地方。浅滩安全，孩子们可以捞鱼、捡螺蛳，体验最纯正的乡村童年乐趣。龙鳞坝是最出片的地方。<br><br><b>💰 费用：</b>免费<br><b>👶 适合：</b>3 岁以上全龄段",nav:"绍兴市上虞区丁宅乡双桥村",facilities:"免费|村口停车"},
-  {id:13,name:"雪花潭",cat:"park",diff:"",diffCls:"",lat:29.750,lng:121.020,season:"夏",summary:"25°C天然冰箱 · 翡翠水潭 · 浅滩安全戏水",desc:"四明山腹地的避暑秘境，夏季水温常年 25°C，被称作“天然冰箱”。翡翠色的水潭深浅不一，浅滩区非常适合孩子玩水。全程约 3 公里，爬升 200-300 米。<br><br><b>⚠️ 重要：</b>暑期需通过「仙山秀水 竹隐陈溪」公众号预约限流<br><b>🅿️ 停车：</b>村口/景区入口免费停车场（车位有限）<br><b>⏱️ 用时：</b>2-3 小时",nav:"绍兴市上虞区陈溪乡虹溪村雪花潭景区",facilities:"免费|停车场|暑期需预约"},
-  {id:14,name:"五甲渡城市公园",cat:"park",diff:"",diffCls:"",lat:30.058,lng:120.860,season:"全年",summary:"曹娥江畔 · 搭帐篷 · 放风筝 · 时光书屋",desc:"上虞曹娥江畔的新晋城市公园。可以在江边草坪搭帐篷、放风筝，时光书屋里可以休息阅读。适合不想进山的轻松周末。<br><br><b>💰 费用：</b>免费<br><b>📚 亮点：</b>时光书屋、曹娥江风光",nav:"绍兴市上虞区五甲渡城市公园",facilities:"免费|停车场|书屋"},
-  {id:15,name:"星越谷(担山村)",cat:"new",diff:"",diffCls:"",lat:29.872,lng:120.775,season:"全年",summary:"2025年新开 · 人工沙滩 · 湖畔咖啡 · 星空露营 · 亲子研学",desc:"2025 年 10 月亮相的全新亲子目的地。人工沙滩 + 湖畔咖啡 + 星空露营 + 亲子研学基地，一站式遛娃。设施新、配套好，是 2026 年值得期待的新去处。<br><br><b>🆕 状态：</b>2025年10月新开，2026年持续完善",nav:"绍兴市上虞区担山村星越谷",facilities:"停车场|咖啡|沙滩|研学基地"},
-  {id:16,name:"春晖青年营地",cat:"new",diff:"",diffCls:"",lat:30.028,lng:120.855,season:"全年",summary:"萌宠乐园 · 无动力乐园 · 湖畔列车打卡 · 58元/人",desc:"白马湖畔的新晋露营地。萌宠乐园可以喂羊驼、兔子，无动力乐园让孩子释放能量，湖畔小列车是网红拍照点。58 元/人含饮品，性价比不错。<br><br><b>💰 费用：</b>58 元/人含饮品<br><b>🐰 互动：</b>萌宠喂食、无动力乐园",nav:"绍兴市上虞区春晖青年营地",facilities:"收费|停车场|萌宠|饮品"}
+  {
+    id:0, name:"梅坞古道", cat:"hike", diff:"简单", diffCls:"tag-diff-easy",
+    lat:29.930, lng:120.820, season:"春夏秋",
+    summary:"5km环线 · 上虞小九寨 · 澄湖蓝宝石 · 亲子徒步首选",
+    desc:"上虞最友好的亲子徒步路线。全程约 5 公里环线，累计爬升仅 168 米，5 岁以上孩子可独立完成。<b>澄湖（蓝宝石湖）</b>是最大亮点 — 水质清澈见底呈蓝绿色，竹林遮天蔽日走起来非常舒服。入口憩马桥有小吃摊和咖啡车，山顶驿廊有洗手间。<br><br><b>🅿️ 停车：</b>梅坞村村委会免费停车场（首选），古道入口少量车位<br><b>⏱️ 用时：</b>2.5-3.5 小时<br><b>📶 信号：</b>山中段不稳定，建议下载离线地图<br><b>👶 适合年龄：</b>5 岁以上",
+    warn:"山中段手机信号弱，提前在村委会附近下载离线地图；雨后石阶较滑，靠近澄湖段注意拉好孩子",
+    tip:"建议上午 9 点前到达避免停车难；下山后可在憩马桥小吃摊补给，推荐当地笋干面",
+    nav:"绍兴市上虞区上浦镇梅坞村村委会",
+    facilities:"停车场|厕所|小吃摊|咖啡车“
+  },
+  {
+    id:1, name:"石井水库环湖", cat:"hike", diff:"极简", diffCls:"tag-diff-easy",
+    lat:29.883, lng:120.833, season:"春秋冬",
+    summary:"4km平路 · 水杉林天空之镜 · 婴儿车可推 · 露营野餐一站式",
+    desc:"几乎零爬升的环湖路线，<b>婴儿车和学步娃完全没问题</b>。11 月水杉变红时是绝美的“天空之镜”——湖水如镜面倒映红色水杉林，是绍兴最出片的秋景。水库边大片草坪可以搭帐篷、野餐，可以和梅坞古道串联成一日游。<br><br><b>🅿️ 停车：</b>水库入口免费停车，周末人多建议早到<br><b>🚻 设施：</b>有公共厕所和自来水<br><b>👶 适合年龄：</b>全龄段（婴儿车友好）",
+    warn:"滩涂泥泞区域小心陷脚，雨后更滑；水边注意看好幼童；禁止篝火但卡式炉可以",
+    tip:"11月水杉红叶季是绝佳拍摄时间；上午水面更平静适合拍倒影；与梅坞古道串联一日游最合理",
+    nav:"绍兴市上虞区上浦镇石井水库",
+    facilities:"免费停车|厕所|自来水“
+  },
+  {
+    id:2, name:"日铸岭古道", cat:"hike", diff:"简单", diffCls:"tag-diff-easy",
+    lat:29.903, lng:120.662, season:"全年",
+    summary:"6km · 南宋官道 · 兰若寺水库 · 2000级石阶 · 历史感满满",
+    desc:"南宋时期的官道，石阶保存完好。从锁泗桥出发，沿途<b>竹林参天蔽日</b>，2000 余级石阶循序渐进。终点可到兰若寺水库和兰若湖景区，把徒步和露营串联。野路短段对孩子有探险趣味。<br><br><b>🅿️ 停车：</b>锁泗桥附近路边可停<br><b>⏱️ 用时：</b>3-4 小时<br><b>🔗 串联：</b>可顺路游玩兰若湖景区（免费沙滩+无动力乐园）<br><b>👶 适合年龄：</b>6 岁以上",
+    warn:"石阶较多，低龄孩子注意体力；部分野路段有荆棘，建议长裤；雨后石阶湿滑",
+    tip:"建议单程走到兰若湖即可，不用走完环线；兰若湖有餐厅可解决午餐；秋季桂花飘香是最佳季节",
+    nav:"绍兴市柯桥区平水镇锁泗桥",
+    facilities:"路边停车|兰若湖配套“
+  },
+  {
+    id:3, name:"埃码尖小环线", cat:"hike", diff:"简单", diffCls:"tag-diff-easy",
+    lat:29.910, lng:120.790, season:"春夏秋",
+    summary:"4km环线 · 大岙水库 · 小众清静 · 绍兴版小九寨沟",
+    desc:"相对小众的短环线，4 公里左右。途经<b>大岙水库</b>，水质完全不输九寨沟的蓝绿色。人少清静，适合想避开人流的小团队家庭。沿途植被茂密，春天杜鹃花开时特别美。<br><br><b>🅿️ 停车：</b>村口免费停车<br><b>⏱️ 用时：</b>2-3 小时<br><b>👶 适合年龄：</b>6 岁以上",
+    warn:"小众路线标识不如成熟景区清晰，建议下载离线轨迹；山路较窄注意孩子行走安全",
+    tip:"五一期间热门路线人多，这里是绝佳的避开人流选择；建议下载'两步路'或'六只脚'app的离线轨迹",
+    nav:"绍兴市上虞区埃码尖",
+    facilities:"村口停车“
+  },
+  {
+    id:4, name:"盐帮十八渡", cat:"hike", diff:"中等", diffCls:"tag-diff-mid",
+    lat:29.460, lng:120.960, season:"夏秋",
+    summary:"5.4km(玩水段) · 18个渡口 · 鱼鳞坝 · 最佳亲子玩水线",
+    desc:"新昌深山里的<b>宝藏玩水线</b>。十八个渡口每个都是天然的玩水点，鱼鳞坝是网红打卡点，孩子们可以安全地踩水、捞小鱼。只走十八渡玩水段（0 爬升），从里家溪村出发到牛坪渡往返约 5.4 公里。完整环线约 13 公里。<br><br><b>🅿️ 停车：</b>里家溪村免费停车<br><b>⏱️ 用时：</b>玩水段 2-3 小时<br><b>👶 适合年龄：</b>4 岁以上（玩水段）",
+    warn:"雨天或雨后有山洪风险，务必关注天气；渡口石头易长青苔很滑，溯溪鞋必备勿穿拖鞋；部分渡口水深到大腿，幼童需大人全程陪同",
+    tip:"带孩子只走玩水段就够了，不用走全程环线；带水枪+捞鱼网孩子能玩一整天；沿途无补给店，水和食物自备充足",
+    nav:"绍兴市新昌县里家溪村",
+    facilities:"村口停车|沿途无补给“
+  },
+  {
+    id:5, name:"韩妃江古道", cat:"hike", diff:"中等", diffCls:"tag-diff-mid",
+    lat:29.440, lng:120.900, season:"春夏秋",
+    summary:"8km · 山水栈道 · 玉狮潭碧水 · 浙江最轻松山水徒步",
+    desc:"从新昌白岩村出发的山水栈道，全程约 8 公里，沿韩妃江而行，<b>风景绝佳视野开阔</b>。路线平缓为主，被称为浙江最轻松的山水徒步线之一。玉狮潭水色碧绿，是中途休息拍照的好地方。<br><br><b>🅿️ 停车：</b>白岩村免费停车<br><b>⏱️ 用时：</b>3-4 小时<br><b>🔗 可串联：</b>盐帮十八渡（同一区域）<br><b>👶 适合年龄：</b>7 岁以上",
+    warn:"8km对幼童偏长，建议7岁以上；夏季注意防晒，部分路段无树荫；沿途无补给点自备充足水",
+    tip:"春秋两季风景最佳；可和新昌其他景点（大佛寺等）组合两日游；走单程让家人开车到终点接更轻松",
+    nav:"绍兴市新昌县白岩村",
+    facilities:"村口停车|沿途无补给“
+  },
+  {
+    id:6, name:"丁宅乡环浙步道", cat:"hike", diff:"简单", diffCls:"tag-diff-easy",
+    lat:29.847, lng:120.955, season:"春夏秋",
+    summary:"5km · 龙鳞坝 · 十里桃花 · 官方赛事路线 · 设施完善",
+    desc:"上虞丁宅乡的官方步道，<b>设施完善安全标识清晰</b>。春季十里桃花盛开美不胜收，龙鳞坝是网红打卡点。附近有水上乐园、双桥村溪流（可捞鱼捡螺蛳）。2025 年举办过环浙步道徒步赛。<br><br><b>🅿️ 停车：</b>丁宅乡停车场<br><b>⏱️ 用时：</b>2-3 小时<br><b>👶 适合年龄：</b>全龄段",
+    warn:"龙鳞坝水流急时注意安全，不要让孩子单独在坝上走；夏季注意防晒",
+    tip:"春季桃花+龙鳞坝组合最佳；可与双桥村溪流串联一日游；丁宅乡有多家农家乐可解决午餐",
+    nav:"绍兴市上虞区丁宅乡",
+    facilities:"停车场|龙鳞坝|水上乐园“
+  },
+  {
+    id:7, name:"雪窦岭古道", cat:"hike", diff:"中等", diffCls:"tag-diff-mid",
+    lat:29.950, lng:120.580, season:"秋",
+    summary:"10km往返 · 水杉林 · 山顶悬崖咖啡 · 补给好路线平缓",
+    desc:"秋季水杉红了的时候最美，<b>山顶悬崖杉洞咖啡</b>是最大亮点——走累了在山顶喝杯咖啡看风景非常惬意。全程约 10 公里往返，路平缓补给好，虽然距离长但对新手仍然友好。<br><br><b>🅿️ 停车：</b>稽东镇入口停车场<br><b>⏱️ 用时：</b>4-5 小时<br><b>☕ 亮点：</b>山顶悬崖咖啡<br><b>👶 适合年龄：</b>8 岁以上",
+    warn:"10km对幼童距离偏长，建议8岁以上且有徒步经验的孩子；秋冬季山顶风大注意保暖",
+    tip:"秋季（10月底-11月）水杉红叶是最佳观赏期；山顶咖啡价格偏高但体验值得；建议上午出发在天黑前下山",
+    nav:"绍兴市柯桥区稽东镇雪窦岭",
+    facilities:"停车场|山顶咖啡“
+  },
+  {
+    id:8, name:"覆卮山景区", cat:"hike", diff:"较难", diffCls:"tag-diff-hard",
+    lat:29.820, lng:120.980, season:"春秋",
+    summary:"4-5h · 千亩梯田 · 万年石浪攀爬 · 冰川遗迹 · 大孩子专属",
+    desc:"适合有徒步经验的<b>大孩子家庭</b>。万年石浪（冰川遗迹）攀爬是最独特的体验——需要手脚并用在巨石间穿行，孩子会觉得超级刺激。千年梯田四季皆美尤其春天灌水期。<br><br><b>🅿️ 停车：</b>景区停车场<br><b>⏱️ 用时：</b>4-5 小时<br><b>👶 适合年龄：</b>10 岁以上且有徒步经验",
+    warn:"石浪段需要手脚并用攀爬，务必戴防滑手套；不建议8岁以下尝试全程；下山对膝盖压力大建议用登山杖；雨天石浪极滑请放弃攀爬",
+    tip:"春季梯田灌水期倒映天空是最美拍摄时间；体力有限的家庭可以只走梯田段不爬石浪；带上手套+登山杖+护膝三件套",
+    nav:"绍兴市上虞区覆卮山景区",
+    facilities:"景区停车场|游客中心|补给点“
+  },
+  {
+    id:9, name:"石井水库露营地", cat:"camp", diff:"", diffCls:"",
+    lat:29.882, lng:120.835, season:"春秋冬",
+    summary:"免费 · 水杉林下搭帐篷 · 秋季天空之镜 · 绍兴最出片营地",
+    desc:"与石井水库环湖徒步共享同一片水杉林，是<b>绍兴最出片的露营地</b>。秋季水杉变红时湖水如镜面，被称作“天空之镜”。草坪平坦适合搭帐篷，有公共厕所和自来水。周末需早到占位。<br><br><b>💰 费用：</b>免费<br><b>🚫 禁止：</b>篝火<br><b>🔥 允许：</b>卡式炉（注意防火）<br><b>⏰ 建议到达：</b>周末 9:00 前",
+    warn:"禁止篝火（水杉林防火要求严格）；滩涂区域小心陷脚；周末人较多建议早到；夜间无照明需自备灯具",
+    tip:"秋季（11月）水杉红时是最佳露营季；上午水面平静最适合拍照；卡式炉可以煮火锅/烧烤；备好蚊香/驱蚊水",
+    nav:"绍兴市上虞区上浦镇石井水库",
+    facilities:"免费|厕所|自来水“
+  },
+  {
+    id:10, name:"兰若湖景区", cat:"camp", diff:"", diffCls:"",
+    lat:29.950, lng:120.600, season:"全年",
+    summary:"免费沙滩 · 无动力乐园 · 皮划艇 · 萌宠 · 2025绍兴遛娃天花板",
+    desc:"2025 年爆火的<b>绍兴新晋遛娃天花板</b>。免费沙滩让孩子尽情挖沙，丹麦进口无动力乐园免费玩，皮划艇、萌宠互动、大草坪野餐一应俱全。附近有桃源里餐厅和湖景民宿，可露营过夜。<br><br><b>💰 费用：</b>门票+停车全免<br><b>⏰ 开放：</b>8:30-17:00<br><b>🍽️ 餐饮：</b>桃源里餐厅、咖啡车<br><b>🏕️ 露营：</b>指定区域可搭帐篷",
+    warn:"五一期间人很多建议8:30前到达；沙滩区注意幼童安全；皮划艇需穿救生衣；萌宠互动注意卫生洗手",
+    tip:"沙滩玩具自带（铲子、桶等）；无动力乐园适合3-12岁各年龄段；桃源里餐厅周末需排队建议错峰或自带便当",
+    nav:"绍兴市柯桥区平王线兰若湖景区",
+    facilities:"免费|停车场|厕所|餐厅|民宿“
+  },
+  {
+    id:11, name:"迪荡湖公园", cat:"camp", diff:"", diffCls:"",
+    lat:30.013, lng:120.613, season:"全年",
+    summary:"市区近郊 · 超大草坪 · 环湖骑行 · 儿童游乐区 · 半日休闲",
+    desc:"越城区最近的休闲露营地，离市区仅十几分钟车程。超大草坪适合放风筝、踢球、野餐。环湖绿道可以带孩子骑行（有共享单车），有专门的儿童游乐区。适合不想跑太远的半日休闲游。<br><br><b>💰 费用：</b>停车 5 元/4 小时<br><b>🚲 设施：</b>环湖绿道、儿童游乐区、自助售货机<br><b>👶 适合：</b>全龄段",
+    warn:"市区公园不可明火（卡式炉也不可以）；草坪周末人流量大；注意湖边安全没有围栏",
+    tip:"适合半日休闲+野餐；环湖一圈约5km适合骑车；东入口停车位更多；附近迪荡商圈可吃饭",
+    nav:"绍兴市越城区迪荡湖公园东入口",
+    facilities:"收费停车|厕所|游乐区“
+  },
+  {
+    id:12, name:"丁宅乡双桥村", cat:"camp", diff:"", diffCls:"",
+    lat:29.850, lng:120.958, season:"春夏秋",
+    summary:"免费溪流 · 抓鱼捡螺蛳 · 龙鳞坝打卡 · 纯正乡村童年",
+    desc:"丁宅乡除了环浙步道，双桥村的溪流更是<b>玩水遛娃的好地方</b>。浅滩安全，孩子们可以捞鱼、捡螺蛳，体验最纯正的乡村童年乐趣。龙鳞坝是最出片的地方。<br><br><b>💰 费用：</b>免费<br><b>👶 适合年龄：</b>3 岁以上全龄段<br><b>🅿️ 停车：</b>村口免费",
+    warn:"溪流石头有青苔很滑务必穿溯溪鞋；暴雨后水流可能变急注意安全；龙鳞坝不要让孩子单独攀爬",
+    tip:"带捞鱼网+小水桶+水枪三件套；和丁宅乡步道串联一日游；村里有农家乐可吃午饭",
+    nav:"绍兴市上虞区丁宅乡双桥村",
+    facilities:"免费|村口停车“
+  },
+  {
+    id:13, name:"雪花潭", cat:"park", diff:"", diffCls:"",
+    lat:29.750, lng:121.020, season:"夏",
+    summary:"25°C天然冰箱 · 翡翠水潭 · 浅滩安全 · 四明山避暑秘境",
+    desc:"四明山腹地的避暑秘境，<b>夏季水温常年 25°C</b>，被称作“天然冰箱”。翡翠色的水潭深浅不一，浅滩区非常适合孩子玩水。全程约 3 公里，爬升 200-300 米。是绍兴周边最受欢迎的夏季戏水地。<br><br><b>⚠️ 预约：</b>暑期（7-8月）需通过「仙山秀水 竹隐陈溪」公众号预约限流<br><b>🅿️ 停车：</b>村口/景区入口免费（车位有限建议早到）<br><b>⏱️ 用时：</b>2-3 小时<br><b>👶 适合年龄：</b>5 岁以上",
+    warn:"暑期必须提前在公众号预约否则可能被拦；车位极其有限建议8:00前到达；部分潭水较深禁止跳水；雨天路滑谨慎前往",
+    tip:"暑期周末务必7:30前出发；带泳衣+浴巾+水枪+溯溪鞋；山上信号差提前截图预约码；非暑假期间无需预约人少体验好",
+    nav:"绍兴市上虞区陈溪乡虹溪村雪花潭景区",
+    facilities:"免费|停车场|暑期需预约“
+  },
+  {
+    id:14, name:"五甲渡城市公园", cat:"park", diff:"", diffCls:"",
+    lat:30.058, lng:120.860, season:"全年",
+    summary:"曹娥江畔 · 搭帐篷放风筝 · 时光书屋 · 轻松周末好去处",
+    desc:"上虞曹娥江畔的新晋城市公园。可以在江边草坪搭帐篷、放风筝，<b>时光书屋</b>里可以休息阅读+喝咖啡。适合不想进山的轻松周末。<br><br><b>💰 费用：</b>免费<br><b>📚 亮点：</b>时光书屋、曹娥江风光<br><b>🅿️ 停车：</b>公园停车场<br><b>👶 适合：</b>全龄段",
+    warn:"江边注意孩子安全，部分江岸无护栏；大风天气不适合搭帐篷；不可明火",
+    tip:"适合半天休闲游；时光书屋周末可能满座建议错峰；江边傍晚夕阳很美适合拍照",
+    nav:"绍兴市上虞区五甲渡城市公园",
+    facilities:"免费|停车场|书屋“
+  },
+  {
+    id:15, name:"星越谷(担山村)", cat:"new", diff:"", diffCls:"",
+    lat:29.872, lng:120.775, season:"全年",
+    summary:"2025新开 · 人工沙滩+湖畔咖啡 · 星空露营 · 亲子研学",
+    desc:"2025 年 10 月亮相的全新亲子目的地。人工沙滩 + 湖畔咖啡 + 星空露营 + 亲子研学基地，<b>设施新配套好</b>，是 2026 年值得期待的新去处，一站式遛娃。<br><br><b>🆕 状态：</b>2025年10月新开，2026年持续完善中<br><b>💰 费用：</b>部分项目收费<br><b>👶 适合：</b>全龄段",
+    warn:"新开业部分设施可能还在完善中；建议去之前电话确认开放项目和营业时间",
+    tip:"关注'星越谷'公众号获取最新活动信息；研学基地需提前预约；星空露营需自备帐篷或现场租赁",
+    nav:"绍兴市上虞区担山村星越谷",
+    facilities:"停车场|咖啡|沙滩|研学基地“
+  },
+  {
+    id:16, name:"春晖青年营地", cat:"new", diff:"", diffCls:"",
+    lat:30.028, lng:120.855, season:"全年",
+    summary:"萌宠乐园 · 无动力乐园 · 湖畔小列车 · 58元含饮品",
+    desc:"白马湖畔的新晋露营地。萌宠乐园可以喂羊驼、兔子，无动力乐园让孩子释放能量，<b>湖畔小列车</b>是网红拍照点。58 元/人含饮品，性价比不错。<br><br><b>💰 费用：</b>58 元/人含饮品<br><b>🐰 互动：</b>萌宠喂食、无动力乐园<br><b>🚂 打卡：</b>湖畔小列车<br><b>👶 适合：</b>2 岁以上",
+    warn:"萌宠互动注意卫生，喂食后洗手；部分项目需额外付费提前确认；营地内禁止自带明火设备",
+    tip:"性价比高适合半日到一日游；拍照打卡点很多建议穿浅色衣服；白马湖夕阳非常美",
+    nav:"绍兴市上虞区春晖青年营地",
+    facilities:"收费|停车场|萌宠|饮品"
+  }
 ];
 
-var CAT_COLORS = {hike:'#22c55e',camp:'#f59e0b',park:'#3b82f6',new:'#8b5cf6'};
-var CAT_EMOJI = {hike:'🥾',camp:'⛺',park:'🌳',new:'✨'};
-var CAT_NAMES = {hike:'亲子徒步',camp:'露营野餐',park:'公园景区',new:'新晋打卡'};
+var CAT_COLORS = {hike:'#22c55e', camp:'#f59e0b', park:'#3b82f6', new:'#8b5cf6'};
+var CAT_EMOJI = {hike:'🥾', camp:'⛺', park:'🌳', new:'✨'};
+var CAT_NAMES = {hike:'亲子徒步', camp:'露营野餐', park:'公园景区', new:'新晋打卡'};
 
-// ===== Tab 切换 =====
+// ===== Tab Switch =====
 function switchTab(pageId, tabEl) {
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById(pageId).classList.add('active');
-  tabEl.classList.add('active');
-  if(pageId==='page-map' && map){setTimeout(function(){map.invalidateSize()},100);}
+  if(tabEl) tabEl.classList.add('active');
+  if(pageId==='page-map' && map){setTimeout(function(){map.invalidateSize();},100);}
 }
 
-// ===== 地图初始化 (带错误处理) =====
+// ===== Filter =====
+var currentFilter = 'all';
+function filterGuide(cat, chipEl) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');});
+  if(chipEl) chipEl.classList.add('active');
+  var cards = document.querySelectorAll('.guide-card');
+  var count = 0;
+  cards.forEach(function(card){
+    if(cat==='all' || card.getAttribute('data-cat')===cat){
+      card.style.display=''; count++;
+    } else {
+      card.style.display='none';
+    }
+  });
+  document.getElementById('guide-count').textContent = '显示 ' + count + ' 个目的地';
+}
+
+// ===== Map =====
 var map = null;
 var markers = [];
 
 function initMap() {
-  if(typeof L==='undefined'){
-    showMapError();
-    return;
-  }
+  if(typeof L==='undefined'){showMapError();return;}
   try {
-    document.getElementById('map-loading').style.display = 'block';
-    document.getElementById('map-error').style.display = 'none';
-
-    map = L.map('map', {center:[29.88,120.72], zoom:10, zoomControl:false, attributionControl:false});
-
-    // 高德地图瓦片 (国内最快)
-    L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
-      subdomains:'1234', maxZoom:18, attribution:'© 高德地图'
+    document.getElementById('map-loading').style.display='block';
+    document.getElementById('map-error').style.display='none';
+    map = L.map('map',{center:[29.88,120.72],zoom:10,zoomControl:false,attributionControl:false});
+    L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',{
+      subdomains:'1234',maxZoom:18,attribution:'© 高德地图'
     }).addTo(map);
-
-    // 如果高德瓦片加载失败，30秒后切换到OSM
-    var tileFallbackTimeout = setTimeout(function(){
-      console.log('Tile fallback: switching to OSM');
-      map.eachLayer(function(layer){
-        if(layer instanceof L.TileLayer) map.removeLayer(layer);
-      });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18}).addTo(map);
-    }, 15000);
-
-    // 当地图首次加载瓦片时清除超时
-    map.on('tileload', function(){clearTimeout(tileFallbackTimeout)});
-
+    var fallback=setTimeout(function(){
+      map.eachLayer(function(layer){if(layer instanceof L.TileLayer) map.removeLayer(layer);});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
+    },15000);
+    map.on('tileload',function(){clearTimeout(fallback);});
     L.control.zoom({position:'bottomright'}).addTo(map);
-
-    // 添加标记
     PLACES.forEach(function(p,i){
-      var icon = L.divIcon({
-        html:'<div style="width:34px;height:34px;border-radius:50%;background:'+CAT_COLORS[p.cat]+';color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid #fff;">'+CAT_EMOJI[p.cat]+'</div>',
-        className:'', iconSize:[34,34], iconAnchor:[17,17], popupAnchor:[0,-19]
+      var icon=L.divIcon({
+        html:'<div style="width:36px;height:36px;border-radius:50%;background:'+CAT_COLORS[p.cat]+';color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.25);border:2.5px solid #fff;">'+CAT_EMOJI[p.cat]+'</div>',
+        className:'',iconSize:[36,36],iconAnchor:[18,18],popupAnchor:[0,-20]
       });
-      var m = L.marker([p.lat, p.lng], {icon:icon}).addTo(map);
-      m._idx = i;
+      var m=L.marker([p.lat,p.lng],{icon:icon}).addTo(map);
+      m._idx=i;
       m.bindPopup(
         '<div class="popup-name">'+p.name+'</div>'+
         '<div class="popup-meta">'+p.summary+'</div>'+
@@ -287,29 +723,26 @@ function initMap() {
       );
       markers.push(m);
     });
-
-    document.getElementById('map-loading').style.display = 'none';
-  } catch(e) {
-    showMapError();
-  }
+    document.getElementById('map-loading').style.display='none';
+  }catch(e){showMapError();}
 }
 
-function showMapError() {
-  document.getElementById('map-loading').style.display = 'none';
-  document.getElementById('map-error').style.display = 'block';
+function showMapError(){
+  document.getElementById('map-loading').style.display='none';
+  document.getElementById('map-error').style.display='block';
 }
 
-function retryMap() {
-  document.getElementById('map-error').style.display = 'none';
-  document.getElementById('map-loading').style.display = 'block';
+function retryMap(){
+  document.getElementById('map-error').style.display='none';
+  document.getElementById('map-loading').style.display='block';
   if(map){map.remove();map=null;markers=[];}
-  setTimeout(initMap, 500);
+  setTimeout(initMap,500);
 }
 
-function locateMe() {
+function locateMe(){
   if(!navigator.geolocation){showToast('浏览器不支持定位');return;}
   navigator.geolocation.getCurrentPosition(function(pos){
-    var lat=pos.coords.latitude, lng=pos.coords.longitude;
+    var lat=pos.coords.latitude,lng=pos.coords.longitude;
     if(map){
       L.circleMarker([lat,lng],{radius:8,color:'#007aff',fillColor:'#007aff',fillOpacity:0.9,weight:3}).addTo(map).bindPopup('📍 我的位置').openPopup();
       map.flyTo([lat,lng],13,{duration:0.8});
@@ -318,58 +751,81 @@ function locateMe() {
   },function(){showToast('定位失败，请检查手机定位权限');},{enableHighAccuracy:true,timeout:10000});
 }
 
-// ===== 攻略列表 =====
-(function buildGuide() {
-  var guideList = document.getElementById('guide-list');
-  PLACES.forEach(function(p,i){
-    var card = document.createElement('div');
-    card.className = 'guide-card';
-    var tagHtml = '';
-    if(p.diff) tagHtml += '<span class="tag '+p.diffCls+'">难度:'+p.diff+'</span>';
-    tagHtml += '<span class="tag tag-season">最佳:'+p.season+'</span>';
+// ===== Build Guide Cards =====
+(function buildGuide(){
+  var list=document.getElementById('guide-list');
+  PLACES.forEach(function(p){
+    var card=document.createElement('div');
+    card.className='guide-card cat-'+p.cat;
+    card.setAttribute('data-cat',p.cat);
+
+    var tagHtml='';
+    if(p.diff) tagHtml+='<span class="tag '+p.diffCls+'">难度:'+p.diff+'</span>';
+    tagHtml+='<span class="tag tag-season">最佳:'+p.season+'</span>';
     if(p.facilities){
-      p.facilities.split('|').forEach(function(f){tagHtml += '<span class="tag tag-facility">'+f+'</span>'});
+      p.facilities.split('|').forEach(function(f){
+        tagHtml+='<span class="tag tag-facility">'+f+'</span>';
+      });
     }
+
+    var warnHtml='', tipHtml='';
+    if(p.warn) warnHtml='<div class="warn-box"><div class="warn-title">⚠️ 注意事项</div>'+p.warn+'</div>';
+    if(p.tip) tipHtml='<div class="tip-box"><div class="tip-title">💡 游玩建议</div>'+p.tip+'</div>';
+
     card.innerHTML =
       '<div class="guide-card-header" onclick="this.parentElement.classList.toggle(\'open\')">'+
         '<span class="emoji">'+CAT_EMOJI[p.cat]+'</span>'+
-        '<div class="info"><div class="name">'+p.name+' <span style="font-size:11px;color:#888;font-weight:400">'+CAT_NAMES[p.cat]+'</span></div><div class="summary">'+p.summary+'</div></div>'+
+        '<div class="info">'+
+          '<div class="name">'+p.name+' <span class="cat-label">'+CAT_NAMES[p.cat]+'</span></div>'+
+          '<div class="summary">'+p.summary+'</div>'+
+        '</div>'+
         '<span class="arrow">▼</span>'+
       '</div>'+
       '<div class="guide-card-body">'+
         '<div class="detail">'+p.desc+'</div>'+
-        '<div style="margin-top:8px">'+tagHtml+'</div>'+
+        warnHtml+tipHtml+
+        '<div class="tag-row">'+tagHtml+'</div>'+
         '<div class="nav-row">'+
           '<a href="https://uri.amap.com/navigation?to='+p.lng+','+p.lat+','+encodeURIComponent(p.name)+'&mode=car&coordinate=gaode" target="_blank" class="nav-amap">🗺 高德导航</a>'+
           '<a href="https://maps.apple.com/?daddr='+p.lat+','+p.lng+'&dirflg=w" target="_blank" class="nav-apple">🍎 苹果地图</a>'+
           '<a href="https://api.map.baidu.com/direction?destination=latlng:'+p.lat+','+p.lng+'%7Cname:'+encodeURIComponent(p.nav)+'&coord_type=wgs84&mode=driving&output=html&src=webapp" target="_blank" class="nav-baidu">🔴 百度地图</a>'+
         '</div>'+
       '</div>';
-    guideList.appendChild(card);
+    list.appendChild(card);
   });
+  document.getElementById('guide-count').textContent = '共 ' + PLACES.length + ' 个目的地 · 点击卡片展开详情';
 })();
 
-// ===== 装备清单 =====
+// ===== Build Checklist =====
 (function buildChecklist(){
-  var items = ['防滑登山鞋/运动鞋（溯溪带溯溪鞋）','登山杖（碳纤维轻量款适合孩子）','双肩背包（每人一个）','饮用水（每人至少 1L）','零食/便当（古道途中多无补给）','防晒霜 + 遮阳帽','驱蚊水/防蚊喷雾','儿童换洗衣物（玩水多带 2-3 套）','雨衣/一次性雨披','急救包（创可贴、碘伏、退烧药）','湿纸巾 + 纸巾','垃圾袋（带走所有垃圾）','充电宝（山区信号差耗电快）','水枪/捞鱼网（玩水路线必备）','折叠野餐垫/帐篷（露营路线）'];
-  var el = document.getElementById('checklist');
+  var items=[
+    '防滑登山鞋/运动鞋（溯溪带溯溪鞋）','登山杖（碳纤维轻量款适合孩子）',
+    '双肩背包（每人一个）','饮用水（每人至少 1L，夏季加倍）',
+    '零食/便当（古道途中多无补给）','防晒霜 + 遮阳帽 + 太阳镜',
+    '驱蚊水/防蚊喷雾（夏季必备）','儿童换洗衣物（玩水多带 2-3 套）',
+    '雨衣/一次性雨披（山区天气多变）','急救包（创可贴、碘伏、退烧药、防中暑药）',
+    '湿纸巾 + 纸巾','垃圾袋（带走所有垃圾）',
+    '充电宝（山区信号差耗电快）','水枪/捞鱼网/沙滩玩具（玩水路线）',
+    '折叠野餐垫/帐篷/防潮垫（露营路线）','薄外套（山区昼夜温差大）'
+  ];
+  var el=document.getElementById('checklist');
   items.forEach(function(item){
-    var label = document.createElement('label');
-    label.className = 'checklist-item';
-    label.innerHTML = '<input type="checkbox"><span>'+item+'</span>';
+    var label=document.createElement('label');
+    label.className='checklist-item';
+    label.innerHTML='<input type="checkbox"><span>'+item+'</span>';
     el.appendChild(label);
   });
 })();
 
 // ===== Toast =====
 function showToast(msg){
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show')}, 1800);
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},1800);
 }
 
-// ===== 启动地图 =====
-setTimeout(initMap, 300);
+// ===== Init =====
+setTimeout(initMap,300);
 </script>
 </body>
 </html>
